@@ -1,7 +1,8 @@
+// ✅ 完整版 track.js with visibilitychange + fallback
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// ✅ Firebase 配置
+// ✅ Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyD93-CezI0YDc62hL_71EV-0ct7l1amyGI",
   authDomain: "hyperlinking-9826f.firebaseapp.com",
@@ -12,47 +13,33 @@ const firebaseConfig = {
   appId: "1:449564834065:web:911b53ab43142ee555b4b0"
 };
 
-// ✅ 初始化 Firebase（避免重复）
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ✅ 生成 visitorId
-function getVisitorId() {
-  let id = localStorage.getItem("visitorId");
-  if (!id) {
-    const dateStr = new Date().toISOString().split("T")[0].replace(/-/g, "");
-    const rand = Math.random().toString(36).substring(2, 8);
-    id = `visitor-${dateStr}-${rand}`;
-    localStorage.setItem("visitorId", id);
-  }
-  return id;
+// ✅ Visitor ID (stored locally)
+let visitorId = localStorage.getItem("visitorId");
+if (!visitorId) {
+  visitorId = "v_" + Math.random().toString(36).substring(2);
+  localStorage.setItem("visitorId", visitorId);
 }
 
-const visitorId = getVisitorId();
+// ✅ Path detection
+const path = window.location.pathname;
+const page = path;
 
-const page = isHome ? "/index" : path;
-
-// ✅ 创建 session 节点
+// ✅ Create session
 const sessionRef = push(ref(db, `trackingVisitors/${visitorId}/sessions`));
-
 const data = {
-  page: window.location.pathname, // ✅ 保留真实路径
+  page: page,
   url: window.location.href,
   userAgent: navigator.userAgent,
   startTime: Date.now(),
   mouseTrail: [],
   clicks: [],
-  returns: []
-};
-  url: window.location.href,
-  userAgent: navigator.userAgent,
-  startTime: Date.now(),
-  mouseTrail: [],
-  clicks: [],
-  returns: [] // ✅ 记录离开与返回的时间段
+  returns: [] // { leave: time, return: time }
 };
 
-// ✅ 鼠标轨迹
+// ✅ Mouse movement tracker
 let lastMousePos = { x: null, y: null };
 let prevPos = null;
 const MAX_TRAIL = 120;
@@ -77,7 +64,8 @@ setInterval(() => {
   }
 }, 500);
 
-// ✅ 点击链接
+// ✅ Click tracking
+
 document.addEventListener("click", (e) => {
   const link = e.target.closest("a");
   if (link && link.href) {
@@ -88,35 +76,28 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// ✅ 可见性变化（检测是否切走再回来）
-let pauseStart = null;
-
+// ✅ Visibility change tracker
+let hasUploaded = false;
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "hidden") {
-    pauseStart = Date.now();
+  if (document.visibilityState === "hidden" && !hasUploaded) {
+    data.returns.push({ leave: Date.now() });
+    data.endTime = Date.now();
+    set(sessionRef, data);
+    hasUploaded = true;
+    console.log("\u{1F44B} Page hidden — uploaded");
   } else if (document.visibilityState === "visible") {
-    if (pauseStart) {
-      data.returns.push({
-        leftAt: pauseStart,
-        backAt: Date.now()
-      });
-      pauseStart = null;
-    } else {
-      data.returns.push({
-        backAt: Date.now()
-      });
-    }
+    data.returns.push({ return: Date.now() });
+    hasUploaded = false; // 允许再次上传
+    console.log("\u{1F440} Page visible again");
   }
 });
 
-// ✅ 定时上传（如果页面不跳走也能保存）
+// ✅ Fallback timeout in case no visibility event fires
 setTimeout(() => {
-  data.endTime = Date.now();
-  set(sessionRef, data);
-}, 5000);
-
-// ✅ 正常 unload 上传
-window.addEventListener("beforeunload", () => {
-  data.endTime = Date.now();
-  set(sessionRef, data);
-});
+  if (!hasUploaded) {
+    data.endTime = Date.now();
+    set(sessionRef, data);
+    hasUploaded = true;
+    console.log("\u{23F3} Timed fallback upload");
+  }
+}, 8000);
