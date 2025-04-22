@@ -30,20 +30,20 @@ function getVisitorId() {
 
 const visitorId = getVisitorId();
 
-// ✅ 更严谨地判断主页路径
-const path = window.location.pathname;
-const isHome =
-  path === "/" ||
-  path === "/Hyperlink_v1/" ||
-  path === "/Hyperlink_v1/index.html";
-
 const page = isHome ? "/index" : path;
 
 // ✅ 创建 session 节点
 const sessionRef = push(ref(db, `trackingVisitors/${visitorId}/sessions`));
 
 const data = {
-  page: page,
+  page: window.location.pathname, // ✅ 保留真实路径
+  url: window.location.href,
+  userAgent: navigator.userAgent,
+  startTime: Date.now(),
+  mouseTrail: [],
+  clicks: [],
+  returns: []
+};
   url: window.location.href,
   userAgent: navigator.userAgent,
   startTime: Date.now(),
