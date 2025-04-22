@@ -1,4 +1,3 @@
-// track.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
@@ -13,7 +12,7 @@ const firebaseConfig = {
   appId: "1:449564834065:web:911b53ab43142ee555b4b0"
 };
 
-// ✅ 初始化 Firebase（避免重复）
+// ✅ 初始化 Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
@@ -33,17 +32,19 @@ const visitorId = getVisitorId();
 
 // ✅ 创建 session 节点
 const sessionRef = push(ref(db, `trackingVisitors/${visitorId}/sessions`));
+
+// ✅ 页面路径处理（更宽松判断首页）
+const path = window.location.pathname;
+const page = path.includes("index") || path === "/" || path === "/Hyperlink_v1/" ? "/index" : path;
+
 const data = {
-page:
-  window.location.pathname.includes("index")
-    ? "/index"
-    : window.location.pathname,
+  page: page,
   url: window.location.href,
   userAgent: navigator.userAgent,
   startTime: Date.now(),
   mouseTrail: [],
   clicks: [],
-  returns: [] // ✅ 新增：记录离开与返回的时间段
+  returns: []
 };
 
 // ✅ 鼠标轨迹
@@ -75,19 +76,34 @@ setInterval(() => {
 document.addEventListener("click", (e) => {
   const link = e.target.closest("a");
   if (link && link.href) {
+    // 新标签页不阻止跳转
+    if (link.target === "_blank") {
+      data.clicks.push({
+        href: link.href,
+        time: Date.now()
+      });
+      return;
+    }
+
+    // 阻止跳转，等数据上传后再跳
+    e.preventDefault();
     data.clicks.push({
       href: link.href,
       time: Date.now()
     });
+    data.endTime = Date.now();
+    set(sessionRef, data).then(() => {
+      window.location.href = link.href;
+    });
   }
 });
 
-// ✅ 可见性变化（检测是否切走再回来）
+// ✅ 可见性变化（切出/返回）
 let pauseStart = null;
-
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") {
     pauseStart = Date.now();
+    uploadSessionData();
   } else if (document.visibilityState === "visible") {
     if (pauseStart) {
       data.returns.push({
@@ -103,8 +119,13 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
-// ✅ 离开页面时上传数据
-window.addEventListener("beforeunload", () => {
+// ✅ 提前上传数据函数
+function uploadSessionData() {
   data.endTime = Date.now();
   set(sessionRef, data);
+}
+
+// ✅ 页面关闭时上传（更稳）
+window.addEventListener("unload", () => {
+  uploadSessionData();
 });
