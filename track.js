@@ -1,4 +1,4 @@
-// track.js
+document.addEventListener("DOMContentLoaded", () => {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
@@ -115,3 +115,4 @@ window.addEventListener("beforeunload", () => {
   data.endTime = Date.now();
   set(sessionRef, data);
 });
+}
