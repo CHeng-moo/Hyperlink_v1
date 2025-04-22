@@ -34,10 +34,10 @@ const visitorId = getVisitorId();
 // ✅ 创建 session 节点
 const sessionRef = push(ref(db, `trackingVisitors/${visitorId}/sessions`));
 const data = {
-  page:
-    window.location.pathname === "/" || window.location.pathname === "/Hyperlink_v1/"
-      ? "/index"
-      : window.location.pathname,
+page:
+  window.location.pathname.includes("index")
+    ? "/index"
+    : window.location.pathname,
   url: window.location.href,
   userAgent: navigator.userAgent,
   startTime: Date.now(),
