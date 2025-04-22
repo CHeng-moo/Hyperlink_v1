@@ -1,22 +1,24 @@
+```js
+// track.js - Single session across pages with index recorded first
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, push, set, update, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// — Firebase 初始化 —
+// —— Firebase 初始化 ——
 const firebaseConfig = {
   apiKey: "AIzaSyD93-CezI0YDc62hL_71EV-0ct7l1amyGI",
   authDomain: "hyperlinking-9826f.firebaseapp.com",
   databaseURL: "https://hyperlinking-9826f-default-rtdb.firebaseio.com",
   projectId: "hyperlinking-9826f",
-  storageBucket: "hyperlinking-9826f.firebasestorage.app",
+  storageBucket: "hyperlinking-9826f.appspot.com",
   messagingSenderId: "449564834065",
   appId: "1:449564834065:web:911b53ab43142ee555b4b0"
 };
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const db  = getDatabase(app);
 
-// — Visitor & Session ID 管理 —
+// —— Visitor 与 Session 管理 ——
 const VISITOR_KEY = "visitorId";
-const SESSION_KEY  = "sessionId";
+const SESSION_KEY = "sessionId";
 
 let visitorId = localStorage.getItem(VISITOR_KEY);
 if (!visitorId) {
@@ -24,95 +26,95 @@ if (!visitorId) {
   localStorage.setItem(VISITOR_KEY, visitorId);
 }
 
-let sessionRef, sessionData;
+let sessionId = sessionStorage.getItem(SESSION_KEY);
+let sessionRef;
+let sessionData;
 
-// — 页面名称判断 —
+// —— 获取页面名 ——
 function getPageName() {
-  let p = window.location.pathname;
-  if (p === "/" || p.endsWith("/index.html") || p === "") return "index";
+  const p = window.location.pathname;
+  if (p === "/" || p === "" || p.endsWith("/index.html")) return "index";
   return p.replace(/^\//, "").replace(/\.html$/, "");
 }
 
-// — 新建 Session 并写一次初始快照 —
-async function createSession() {
-  sessionRef = push(ref(db, `trackingVisitors/${visitorId}/sessions`));
-  sessionData = {
-    page: getPageName(),
-    url:  location.href,
-    ua:   navigator.userAgent,
-    startTime: Date.now(),
-    clicks:   [],
-    mouseTrail: [],
-    returns: []
-  };
-  await set(sessionRef, sessionData);
+// —— 初始化或恢复会话 ——
+async function initSession() {
+  if (sessionId) {
+    sessionRef = ref(db, `trackingVisitors/${visitorId}/sessions/${sessionId}`);
+    const snap = await get(sessionRef);
+    if (snap.exists()) {
+      sessionData = snap.val();
+    } else {
+      sessionId = null;
+    }
+  }
+  if (!sessionId) {
+    sessionRef = push(ref(db, `trackingVisitors/${visitorId}/sessions`));
+    sessionId  = sessionRef.key;
+    sessionStorage.setItem(SESSION_KEY, sessionId);
+    sessionData = {
+      startTime: Date.now(),
+      pages: [],
+      clicks: [],
+      mouseTrail: [],
+      returns: []
+    };
+    await set(sessionRef, sessionData);
+    console.log("✅ New session created:", sessionId);
+  } else {
+    console.log("🔄 Resumed session:", sessionId);
+  }
+  // —— 记录当前页面 ——
+  const pageEntry = { page: getPageName(), time: Date.now() };
+  sessionData.pages.push(pageEntry);
+  await update(sessionRef, { pages: sessionData.pages });
+  console.log("📄 Page recorded:", pageEntry);
 }
 
-// — 恢复已有 Session（如果想要支持跨页面续写） —
-// 略去，这里我们只做首次创建
-
-// — 鼠标 & 点击 追踪 —
-function trackMouseMovement() {
-  let lastPos = null, trailBuf = [], lastFlush = Date.now();
-  const FLUSH_INTERVAL = 500;
-
-  document.addEventListener("mousemove", e => {
-    const now = Date.now();
-    // 每次都立即记录一条
-    trailBuf.push({ x: e.clientX, y: e.clientY, t: now });
-    // 每500ms 批量上传
-    if (now - lastFlush > FLUSH_INTERVAL) {
-      lastFlush = now;
-      sessionData.mouseTrail = sessionData.mouseTrail.concat(trailBuf);
-      if (sessionData.mouseTrail.length > 200) {
-        sessionData.mouseTrail = sessionData.mouseTrail.slice(-200);
-      }
-      update(sessionRef, { mouseTrail: sessionData.mouseTrail })
-        .catch(console.error);
-      trailBuf = [];
-    }
-  });
-
+// —— 鼠标 & 点击 追踪 ——
+function trackInteractions() {
+  // 点击
   document.addEventListener("click", e => {
-    const now = Date.now();
     const rec = {
-      x: e.clientX,
-      y: e.clientY,
-      t: now,
+      x: Date.now(),
+      y: Date.now(),
+      t: Date.now(),
       tag: e.target.tagName,
       href: e.target.closest("a")?.href || null
     };
     sessionData.clicks.push(rec);
-    update(sessionRef, { clicks: sessionData.clicks })
-      .catch(console.error);
+    update(sessionRef, { clicks: sessionData.clicks }).catch(console.error);
   });
-}
-
-// — 页面可见性 追踪 回归/离开 —
-function trackVisibility() {
-  document.addEventListener("visibilitychange", () => {
+  // 鼠标轨迹
+  let buf = [], lastFlush = Date.now();
+  document.addEventListener("mousemove", e => {
+    buf.push({ x: e.clientX, y: e.clientY, t: Date.now() });
+    if (Date.now() - lastFlush > 500) {
+      lastFlush = Date.now();
+      sessionData.mouseTrail = sessionData.mouseTrail.concat(buf).slice(-200);
+      update(sessionRef, { mouseTrail: sessionData.mouseTrail }).catch(console.error);
+      buf = [];
+    }
+  });
+  // 可见性变化
+  document.addEventListener("visibilitychange", async () => {
     const now = Date.now();
     if (document.hidden) {
-      // 离开
       sessionData.returns.push({ leave: now, return: null });
-      update(sessionRef, { returns: sessionData.returns })
-        .catch(console.error);
+      await update(sessionRef, { returns: sessionData.returns });
     } else {
-      // 回来
-      const last = sessionData.returns[sessionData.returns.length - 1];
+      const last = sessionData.returns.at(-1);
       if (last && last.return === null) {
         last.return = now;
-        update(sessionRef, { returns: sessionData.returns })
-          .catch(console.error);
+        await update(sessionRef, { returns: sessionData.returns });
       }
     }
   });
 }
 
-// — 主流程：DOM 就绪后立即创建&开始追踪 —
+// —— 一切就绪后启动 ——
 document.addEventListener("DOMContentLoaded", async () => {
-  await createSession();
-  trackMouseMovement();
-  trackVisibility();
-  console.log("✅ Tracking started for", sessionData.page);
+  await initSession();
+  trackInteractions();
 });
+```
