@@ -109,7 +109,13 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
-// ✅ 离开页面时上传数据
+// ✅ 定时上传（如果页面不跳走也能保存）
+setTimeout(() => {
+  data.endTime = Date.now();
+  set(sessionRef, data);
+}, 5000);
+
+// ✅ 正常 unload 上传
 window.addEventListener("beforeunload", () => {
   data.endTime = Date.now();
   set(sessionRef, data);
