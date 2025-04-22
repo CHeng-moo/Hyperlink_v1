@@ -31,19 +31,26 @@ function getVisitorId() {
 
 const visitorId = getVisitorId();
 
+// ✅ 更严谨地判断主页路径
+const path = window.location.pathname;
+const isHome =
+  path === "/" ||
+  path === "/Hyperlink_v1/" ||
+  path === "/Hyperlink_v1/index.html";
+
+const page = isHome ? "/index" : path;
+
 // ✅ 创建 session 节点
 const sessionRef = push(ref(db, `trackingVisitors/${visitorId}/sessions`));
+
 const data = {
-  page:
-    window.location.pathname === "/" || window.location.pathname === "/Hyperlink_v1/"
-      ? "/index"
-      : window.location.pathname,
+  page: page,
   url: window.location.href,
   userAgent: navigator.userAgent,
   startTime: Date.now(),
   mouseTrail: [],
   clicks: [],
-  returns: [] // ✅ 新增：记录离开与返回的时间段
+  returns: [] // ✅ 记录离开与返回的时间段
 };
 
 // ✅ 鼠标轨迹
