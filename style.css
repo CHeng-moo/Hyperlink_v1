@@ -1,0 +1,471 @@
+:root {
+  --bg: #d9d9d9;
+  --bubble-bg: #fff;
+  --text: #2e2e2e;
+  --title: #e652b0;
+  --green: #ccfc3d;
+  --link: #0077ff;
+  --red-outline: #e65252;
+  --font-title: "Montserrat Underline";
+  --font-bubble: "Moirai One", system-ui;
+  --font--mono: "IBM Plex Mono";
+  ---font--body: "Inter";
+}
+
+body {
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+section {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+
+
+
+.intro-section {
+  background-color: var(--bg);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  position: relative;
+  flex-wrap: wrap;
+}
+
+
+/* 右边标题和段落 */
+.intro-right {
+  flex: 1;
+  max-width: 90vw;
+}
+
+.intro-right h1 {
+  font-family: var(--font-title);
+  color: var(--title);
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-size: clamp(2.5rem, 7vw, 4.5rem);
+  text-transform: uppercase;
+  line-height: 1.1;
+  text-align: right;
+  margin-top: 1rem;
+  margin-bottom: -3rem;
+}
+
+.intro-columns {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-top: 4rem;
+}
+
+/* 左边 bubble 区块 */
+.bubble-text {
+  font-family: var(--font-bubble);
+  font-weight: 400;
+  font-style: normal;
+  font-size: 5rem;
+  color: #e65252; /* 红色填充 */
+  -webkit-text-stroke: 30px white; /* 白色描边 */
+  paint-order: stroke fill; /* ✅ 让描边在外面 */
+  text-align: left;
+  border-radius: 40px;
+  line-height: 1;
+  width: fit-content;
+  margin-top: -4rem;
+}
+
+
+.intro-paragraph {
+  max-width: 550px;
+  font-family: var(--font--mono);
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-top: 3rem;
+  color: #2e2e2e;
+}
+
+.intro-paragraph a {
+  color: var(--link);
+  font-size: 4rem;
+  text-decoration: none;
+}
+
+.intro-paragraph a:hover {
+  text-decoration: underline;
+}
+
+/* 底部开始按钮 */
+.start-label {
+  text-align: left;
+  font-family: var(---font--body);
+  width: 100%;
+  margin-top: -5rem;
+  /* animation */
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+/* 显示状态 */
+.start-label.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.start-label p {
+  color: var(--green);
+  font-weight: bold;
+  font-size: 4rem;
+  line-height: 1;
+}
+
+.down-arrow {
+  display: block;
+  font-size: 5rem;
+  margin-top: -3rem;
+}
+
+
+
+
+/* mainstory 初始也是隐藏 */
+.mainstory {
+  background-color: #F6F6F6;
+  margin-top: -1rem;
+  padding-top: 4rem;
+/* animation */
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+/* mainstory 显示 */
+.mainstory.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* 标题样式 */
+h2 {
+  font-family: var(--font-title);
+  color: var(--title);
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-size: clamp(2rem, 3vw, 3rem);
+  text-transform: uppercase;
+  line-height: 1.1;
+  text-align: left;
+  margin-top: 1rem;
+  margin-bottom: -3rem;
+  width: 600px;
+}
+
+.story-begin {
+  display: flex;
+  align-items: flex-start; /* 顶对齐 */
+  gap: 1rem; /* 两边之间的间距 */
+  margin: 2rem auto;
+  max-width: 1200px;
+  padding: 0 2rem;
+}
+
+.story {
+  flex: 1; 
+}
+
+.story p {
+  max-width: 550px;
+  font-family: var(--font--mono);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin-top: 6rem;
+  color: #2e2e2e;
+}
+
+.otter {
+  flex: 1;
+  max-width: 400px;
+}
+
+.room {
+  width: 60%;
+  margin-left: auto;
+  margin-right: 0;
+  text-align: left;
+
+  border-bottom: 2px dashed  #e652b0;
+  padding-bottom: 2rem; 
+  margin-bottom: 2rem;
+}
+
+.room p{
+  max-width: 550px;
+  font-family: var(--font--mono);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin-top: 6rem;
+  padding-right: 1rem;
+}
+
+.hyperlink{
+  font-family: var(--font--mono);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin-top: 3rem;
+}
+
+.hyperlink p{
+  max-width: 700px;
+  font-family: var(--font--mono);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin-top: 3rem;
+  margin-left: 2rem;
+  text-align: center;
+  margin: 6rem auto 0 auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.quote {
+  font-family: var(--font--mono);
+  font-weight: 400;
+  font-style: normal;
+  font-size: 3rem;
+  color: #e65252; /* 红色填充 */
+  -webkit-text-stroke: 30px rgb(203, 203, 203); /* 白色描边 */
+  paint-order: stroke fill; /* ✅ 让描边在外面 */
+  text-align: left;
+  border-radius: 40px;
+  line-height: 1;
+  width: fit-content;
+  margin-top: 3rem;
+  margin-left: 40%;
+}
+
+.end{
+  max-width: 700px;
+  font-family: var(--font--mono);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin-top: 3rem;
+  margin-left: 2rem;
+  text-align: left;
+}
+
+.end h2{
+  margin-bottom: 2rem;
+}
+
+.end p{
+  max-width: 550px;
+  font-family: var(--font--mono);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin-top: 3rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.thanks{
+  max-width: 700px;
+  font-family: var(--font--mono);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin-top: 3rem;
+ padding-left: 1rem;
+ padding-right: 1rem;
+  text-align: center;
+  margin: 6rem auto 6rem auto
+}
+
+.mainstory a {
+  color:#0077ff;
+  font-size: 160%;
+}
+
+.mainstory a:visited {
+  color: darkblue !important;
+}
+
+
+/* 评论泡泡 */
+.comments-section {
+  background-color: #dcdcdc;
+  font-family: var(--font-title);
+  padding-bottom:5rem;
+}
+
+.title-wrapper{
+  text-align: center;
+}
+
+.comment-title {
+  font-family: var(--font-bubble);
+  font-weight: 400;
+  font-style: normal;
+  font-size: clamp(3rem, 5vw, 4.5rem);
+  color: #e65252; 
+  -webkit-text-stroke: 25px white;
+  paint-order: stroke fill; 
+  text-align: center;
+  border-radius: 50px;
+  line-height: 1;
+
+  margin: 4rem auto; 
+  display: inline-block;
+}
+
+.comments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  margin: 2rem;
+}
+
+.comment-box {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  border:1px,black, solid;
+}
+
+.comment-dot {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 0.3rem;
+}
+
+.comment-box p {
+  font-size: 1.3rem;
+  line-height: 1.5;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.comment-box a {
+  text-decoration: underline;
+  color: blue;
+}
+
+.comment-label {
+  display: block;
+  font-weight: bold;
+  color: #e652b0;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  padding-left: 2rem;
+}
+
+.comment-input {
+  width: 85vw;
+  border: 1px solid #222;
+  margin-left:2rem;
+  margin-right: 4rem;
+  padding: 1rem;
+  font-family: var(--font--mono);
+  font-size: 0.9rem;
+  border-radius: 0.5rem;
+}
+
+.comment-submit {
+  margin-top: 0.8rem;
+  margin-left:85%;
+  background-color:#e652b0;
+  color: white;
+  font-weight: bold;
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.comment-submit:hover {
+  background-color: deeppink;
+}
+
+
+/* 链接样式 */
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:visited {
+  color: darkblue !important; 
+}
+
+
+/* 滚动条样式 */
+/* 整个滚动条区域 */
+::-webkit-scrollbar {
+  height: 10px;           /* 水平滚动条高度 */
+}
+
+/* 滚动轨道 */
+::-webkit-scrollbar-track {
+  background: rgb(240, 240, 240);   /* 背景透明，可改成灰灰的轨道 */
+  border-left: 2px dashed #ccc; /* optional: 可加装饰轨道感 */
+}
+
+/* 滚动滑块（这里做成一个圆形小球） */
+::-webkit-scrollbar-thumb {
+  background-color: white;
+  border: 2px dashed black;   /* 虚线边框球体感 */
+  border-radius: 999px;       /* 圆！ */
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  margin: 2px;
+}
+
+/* hover 更明显一点 */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #f8f8f8;
+  border-color: #666;
+}
+
+@media (max-width: 768px) {
+  .story-begin {
+    flex-direction: column; /* 从横排变成竖排 */
+    align-items: center;
+  }
+
+  .story {
+    flex: unset; /* 取消原来的 flex */
+    width: 100%;
+  }
+
+  h2 {
+ width: 100%
+  }
+  .story p {
+    margin-top: 4rem; /* 减小段落上边距，让上下更自然 */
+  }
+
+  .otter {
+    max-width: 100%;
+    margin-top: 1rem;
+  }
+}
