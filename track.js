@@ -1,4 +1,4 @@
-```js
+
 // track.js - Single session across pages with index recorded first
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, push, set, update, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
