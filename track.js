@@ -58,19 +58,24 @@ async function createSession() {
 // — 鼠标 & 点击 追踪 —
 function trackMouseMovement() {
   let trailBuf = [], lastFlush = Date.now();
-  const FLUSH_INTERVAL = 500;
+  const FLUSH_INTERVAL = 500;  // 每500ms检查一次
 
   document.addEventListener("mousemove", e => {
     const now = Date.now();
     trailBuf.push({ x: e.clientX, y: e.clientY, t: now });
     if (now - lastFlush > FLUSH_INTERVAL) {
       lastFlush = now;
-      sessionData.mouseTrail = sessionData.mouseTrail.concat(trailBuf);
-      if (sessionData.mouseTrail.length > 200) {
-        sessionData.mouseTrail = sessionData.mouseTrail.slice(-200);
-      }
+
+      // --- 采样逻辑：每5个点取1个 ---
+      const sampledTrail = trailBuf.filter((_, idx) => idx % 5 === 0);
+
+      // 保存到sessionData，不裁剪
+      sessionData.mouseTrail = sessionData.mouseTrail.concat(sampledTrail);
+
       update(sessionRef, { mouseTrail: sessionData.mouseTrail })
         .catch(console.error);
+
+      // 清空缓存
       trailBuf = [];
     }
   });
@@ -88,19 +93,10 @@ function trackMouseMovement() {
     };
     sessionData.clicks.push(rec);
 
-    // ✅ mouseClicks：新增轻量点击记录（只记录 x, y, t, tag）
-    if (!sessionData.mouseClicks) sessionData.mouseClicks = [];
-    sessionData.mouseClicks.push({
-      x: e.clientX,
-      y: e.clientY,
-      t: now,
-      tag: e.target.tagName
-    });
 
     // ✅ 一次性更新两份数据
     update(sessionRef, {
       clicks: sessionData.clicks,
-      mouseClicks: sessionData.mouseClicks
     }).catch(console.error);
   });
 }
